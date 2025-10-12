@@ -1,4 +1,4 @@
 settings.py
-test.ipynb
+*.ipynb
 .ipynb_checkpoints/test-checkpoint.ipynb
 *.session
