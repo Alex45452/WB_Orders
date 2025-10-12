@@ -1,11 +1,10 @@
 from telethon import TelegramClient, events, sync
 import settings
-from browser_handle import order_handler
+from browser_handlers import order_handler
+from requests_handlers import add_to_cart_handler
 
-def get_url_from_call(msg):
-    pass
 
-def add_to_cart(url):
+def get_product_from_call(msg):
     pass
 
 def tg_client_start():
@@ -18,9 +17,9 @@ def main():
     @client.on(events.NewMessage())
     async def bot_msg_handler(event):
         ...
-        url = get_url_from_call(event)
-        add_to_cart(url)
-        order_handler()
+        product_id = get_product_from_call(event)
+        if add_to_cart_handler(product_id):
+            order_handler() 
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@ def order_handle():
             """)
     page.reload()
     print(page)
-    order_handler(page)
+    create_order(page)
     check_order(page)
 
     # with page.expect_request("**/data_v2**") as req_info:
