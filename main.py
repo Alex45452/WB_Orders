@@ -47,5 +47,7 @@ async def bot_msg_handler(event):
 
 if __name__ == "__main__":
     client.start()
+    print("Client started!")
     client.run_until_disconnected()
+    print("Client disconnected, closing")
     client.session.save()
