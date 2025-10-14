@@ -7,5 +7,4 @@ __pycache__
 *.har
 *.js
 *test*
-.vscode/launch.json
-.vscode/
+\.vscode/
