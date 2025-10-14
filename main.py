@@ -5,7 +5,10 @@ from requests_handlers import add_to_cart_handler
 import asyncio
 
 MAX_PERCENT = 30
+MIN_ORDER_PERCENT = 10 # todo
 
+# loop = asyncio.new_event_loop()
+# asyncio.set_event_loop(loop)
 
 client = TelegramClient('Acc_with_bot_access', settings.api_id, settings.api_hash,system_version="4.16.30-vxCUSTOM")
 
@@ -18,19 +21,25 @@ def get_product_from_call(msg):
 def get_percent_from_call(text):
     return float(text[text.find('(')+1:text.find(')')-1])
 
+def get_msg_recipient(text):
+    if text.find("RTX") != -1:
+        return -settings.RTX_CUSTOMER_ID
+    return settings.CHANNEL_ID
 
 @client.on(events.NewMessage(incoming=True,from_users=[settings.BOT_ID]))
 async def bot_msg_handler(event):
     
     print("NEW MESSAGE FUCKs")
-    
-    if get_percent_from_call(event.message.message) > MAX_PERCENT:
+    cur_percent = get_percent_from_call(event.message.message)
+    if  cur_percent > MAX_PERCENT :
         return
 
-    await client.send_message(settings.CHANNEL_ID,event.message)
-    # product_id = get_product_from_call(event.message)
-    # if add_to_cart_handler(product_id):
-    #     order_handler() 
+    await client.send_message(get_msg_recipient(event.message.message),event.message)
+    if cur_percent > MIN_ORDER_PERCENT:
+        pass
+        # product_id = get_product_from_call(event.message)
+        # if add_to_cart_handler(product_id):
+        #     order_handler() 
 
 # async def main():
     
