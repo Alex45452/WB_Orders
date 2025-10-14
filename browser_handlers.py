@@ -20,6 +20,10 @@ def check_order(page):
     # request = req_info.value
     # print("Отправлен запрос:", request.url)
 
+def browser_close(context,browser):
+    context.close()
+    browser.close()
+
 def order_handler():
 
     browser = sync_playwright().chromium.launch(headless=False)
@@ -35,15 +39,10 @@ def order_handler():
             """)
     page.reload()
     print(page)
+
     create_order(page)
     check_order(page)
+    browser_close(context,browser)
 
-    # with page.expect_request("**/data_v2**") as req_info:
-    #     page.locator("button.j-btn-confirm-order").click()
-    # request = req_info.value
-    # print("Отправлен запрос:", request.url)
-    brower_closing_handler(context,browser)
-
-def brower_closing_handler(context,browser):
-    context.close()
-    browser.close()
+if __name__ == "__main__":
+    print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")

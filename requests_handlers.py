@@ -41,7 +41,7 @@ def check_response_details(response):
 
 def get_main_params():
     params = {
-        "ts":{int(time.time())},
+        "ts":int(time.time()),
         "device_id":DEVICE_ID
         }
     return params
@@ -70,5 +70,5 @@ def add_to_cart_handler(product_id):
         return check_response_main(main_response)
     return False
 
-
-print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
+if __name__ == "__main__":
+    print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
