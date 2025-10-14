@@ -3,3 +3,8 @@ settings.py
 .ipynb_checkpoints/test-checkpoint.ipynb
 *.session*
 __pycache__
+.vscode
+*.json*
+*.har
+*.js
+*test*
