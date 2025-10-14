@@ -1,4 +1,5 @@
 settings.py
-*.ipynb
+*.ipynb*
 .ipynb_checkpoints/test-checkpoint.ipynb
 *.session*
+__pycache__
