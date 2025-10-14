@@ -20,7 +20,7 @@ def check_order(page):
     # request = req_info.value
     # print("Отправлен запрос:", request.url)
 
-def order_handle():
+def order_handler():
 
     browser = sync_playwright().chromium.launch(headless=False)
     context = browser.new_context()
