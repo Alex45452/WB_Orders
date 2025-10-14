@@ -29,24 +29,23 @@ def get_msg_recipient(text):
 @client.on(events.NewMessage(incoming=True,from_users=[settings.BOT_ID]))
 async def bot_msg_handler(event):
     
-    print("NEW MESSAGE FUCKs")
+    print("Got new message from bot")
     cur_percent = get_percent_from_call(event.message.message)
     if  cur_percent > MAX_PERCENT :
         return
 
     await client.send_message(get_msg_recipient(event.message.message),event.message)
     if cur_percent > MIN_ORDER_PERCENT:
-        pass
-        # product_id = get_product_from_call(event.message)
-        # if add_to_cart_handler(product_id):
-        #     order_handler() 
+        product_id = get_product_from_call(event.message)
+        if add_to_cart_handler(product_id):
+            order_handler() 
 
 # async def main():
     
-# client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[settings.TEST_BOT_ID]))
 
 if __name__ == "__main__":
     client.start()
+    client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[settings.TEST_BOT_ID]))
     print("Client started!")
     client.run_until_disconnected()
     print("Client disconnected, closing")
