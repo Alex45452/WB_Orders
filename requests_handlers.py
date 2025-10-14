@@ -19,7 +19,7 @@ headers = {
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-site",
     "wb-apptype": "site"
-  }
+}
 
 
 def get_product_details_params(product_id):
@@ -39,14 +39,14 @@ def get_product_details_params(product_id):
 def check_response_details(response):
     return response.status_code == 200 and len(response.json()) > 0
 
-def get_add_params():
+def get_main_params():
     params = {
         "ts":{int(time.time())},
         "device_id":DEVICE_ID
         }
     return params
 
-def get_details_data(response_details):
+def get_main_data(response_details):
     data = [{
     "chrt_id":response_details.json()["products"][0]["sizes"][0]["optionId"],
     "quantity":1,
@@ -66,6 +66,9 @@ def check_response_main(response):
 def add_to_cart_handler(product_id):
     response_details = httpx.get(url=DETAIL_URL,params=get_product_details_params(product_id),headers=headers)
     if check_response_details(response_details):
-        main_response = httpx.post(url=ADD_URL,params=get_add_params(),headers=headers,json=get_details_data(response_details))
+        main_response = httpx.post(url=ADD_URL,params=get_main_params(),headers=headers,json=get_main_data(response_details))
         return check_response_main(main_response)
     return False
+
+
+print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
