@@ -19,7 +19,7 @@ def get_product_from_call(msg):
     return product_id
 
 def get_percent_from_call(text):
-    return float(text[text.find('(')+1:text.find(')')-1])
+    return float(text[text.rfind('(')+1:text.rfind(')')-1])
 
 def get_msg_recipient(text):
     if text.find("RTX") != -1:
