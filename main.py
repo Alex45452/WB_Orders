@@ -4,7 +4,7 @@ from browser_handlers import order_handler
 from requests_handlers import add_to_cart_handler
 import asyncio
 
-MAX_PERCENT = 30
+MAX_PERCENT = 20
 MIN_ORDER_PERCENT = 10 # todo
 
 # loop = asyncio.new_event_loop()
@@ -26,7 +26,6 @@ def get_msg_recipient(text):
         return -settings.RTX_CUSTOMER_ID
     return settings.CHANNEL_ID
 
-@client.on(events.NewMessage(incoming=True,from_users=[settings.BOT_ID]))
 async def bot_msg_handler(event):
     
     print("Got new message from bot")
@@ -38,10 +37,7 @@ async def bot_msg_handler(event):
     if cur_percent > MIN_ORDER_PERCENT:
         product_id = get_product_from_call(event.message)
         if add_to_cart_handler(product_id):
-            order_handler() 
-
-# async def main():
-    
+            order_handler()     
 
 if __name__ == "__main__":
     client.start()
