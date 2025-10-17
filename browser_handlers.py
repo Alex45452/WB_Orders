@@ -1,7 +1,8 @@
 from playwright.sync_api import sync_playwright
 from requests_handlers import add_to_cart_handler
+from settings import cookies, wbx_token, cur_address
 import json
-import settings
+import time
 
 MAIN_PAGE_URL = "https://wildberries.ru"
 BASKET_URL = "https://wildberries.ru/lk/basket"
@@ -14,11 +15,11 @@ def create_order(page):
     page.locator("label.list-item__checkbox").first.click()
     if page.locator("span.basket-order__link").count() == 1:
         page.locator("span.basket-order__link").click()
-        page.locator("span.address-item__name-text:has-text('поселение Воскресенское,   40к1')").click()
+        page.locator(f"span.address-item__name-text:has-text('{cur_address}')").click()
         page.get_by_role("button", name="Заберу отсюда").click()
     page.get_by_role("button", name="Заказать").click()
     page.wait_for_selector("button.popup__btn-main", timeout=1000)
-    if page.locator("button.popup__btn-main", has_text="Да, заказать").count() > 0:
+    if page.locator("button.popup__btn-main", has_text="Да, заказать").count() == 1:
         page.click("button.popup__btn-main")
 
 def check_order(page):
@@ -34,16 +35,16 @@ def browser_close(context,browser):
 
 def order_handler():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=True)
         context = browser.new_context()
 
-        context.add_cookies(settings.cookies)
+        context.add_cookies(cookies)
         
         page = context.new_page()
         page.goto(MAIN_PAGE_URL)
 
         page.evaluate(f"""
-                localStorage.setItem('wbx__tokenData', '{json.dumps(settings.wbx_token)}');
+                localStorage.setItem('wbx__tokenData', '{json.dumps(wbx_token)}');
                 """)
         page.reload()
         print(page)
@@ -54,3 +55,7 @@ def order_handler():
 
 if __name__ == "__main__":
     print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
+    start = time.time()
+    if add_to_cart_handler(516341146):
+        order_handler()
+    print(time.time()-start)
