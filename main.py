@@ -41,7 +41,7 @@ async def bot_msg_handler(event):
 
 if __name__ == "__main__":
     client.start()
-    client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[settings.TEST_BOT_ID]))
+    client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[settings.BOT_ID]))
     print("Client started!")
     client.run_until_disconnected()
     print("Client disconnected, closing")
