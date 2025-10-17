@@ -5,7 +5,7 @@ from requests_handlers import add_to_cart_handler
 import asyncio
 
 MAX_PERCENT = 20
-MIN_ORDER_PERCENT = 10 # todo
+MIN_ORDER_PERCENT = 10
 
 # loop = asyncio.new_event_loop()
 # asyncio.set_event_loop(loop)

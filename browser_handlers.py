@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from requests_handlers import add_to_cart_handler
 import json
 import settings
 
@@ -16,6 +17,9 @@ def create_order(page):
         page.locator("span.address-item__name-text:has-text('поселение Воскресенское,   40к1')").click()
         page.get_by_role("button", name="Заберу отсюда").click()
     page.get_by_role("button", name="Заказать").click()
+    page.wait_for_selector("button.popup__btn-main", timeout=1000)
+    if page.locator("button.popup__btn-main", has_text="Да, заказать").count() > 0:
+        page.click("button.popup__btn-main")
 
 def check_order(page):
     ...
@@ -45,9 +49,8 @@ def order_handler():
         print(page)
 
         create_order(page)
-        check_order(page)
+        check_order(page) # todo
         browser_close(context,browser)
 
 if __name__ == "__main__":
     print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
-    order_handler()
