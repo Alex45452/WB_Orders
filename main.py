@@ -37,7 +37,7 @@ async def bot_msg_handler(event):
     if cur_percent > MIN_ORDER_PERCENT:
         product_id = get_product_from_call(event.message)
         if add_to_cart_handler(product_id):
-            order_handler()     
+            await order_handler()     
 
 if __name__ == "__main__":
     client.start()
