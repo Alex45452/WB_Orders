@@ -39,13 +39,18 @@ async def create_order(page):
         await page.locator(f"span.address-item__name-text:has-text('{cur_address}')").click()
         await page.get_by_role("button", name="Заберу отсюда").click()
     await page.get_by_role("button", name="Заказать").click()
+    await asyncio.sleep(0.5)
     bank =  page.locator("li.popup__banks-item:has-text('ПСБ')")
     if await bank.count() == 1:
         await bank.click()
+    await asyncio.sleep(0.5)
     if await page.locator("button.btn-main", has_text="Да, заказать").count() == 1:
+        await page.click("button.btn-main")
+    if await page.locator("button.btn-main", has_text="Пополнить и заказать").count() == 1:
         await page.click("button.btn-main")
     if await page.locator("button.popup__btn-main", has_text="Да, заказать").count() == 1:
         await page.click("button.popup__btn-main")
+
 
 async def check_order(page):
     ...
@@ -81,6 +86,7 @@ async def order_handler(acc_id):
 if __name__ == "__main__":
     print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
     start = time.time()
-    if add_to_cart_handler(283031138):
-        asyncio.run(order_handler())
+    acc_id = 1
+    if add_to_cart_handler(acc_id,308868474):
+        asyncio.run(order_handler(acc_id))
     print(time.time()-start)
