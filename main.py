@@ -1,5 +1,5 @@
 from telethon import TelegramClient, events, sync
-import settings
+from settings import api_id, api_hash, RTX_CUSTOMER_ID, CHANNEL_ID, BOT_ID, ACCOUNTS
 from browser_handlers import order_handler
 from requests_handlers import add_to_cart_handler
 import asyncio
@@ -10,7 +10,7 @@ MIN_ORDER_PERCENT = 10
 # loop = asyncio.new_event_loop()
 # asyncio.set_event_loop(loop)
 
-client = TelegramClient('Acc_with_bot_access', settings.api_id, settings.api_hash,system_version="4.16.30-vxCUSTOM")
+client = TelegramClient('Acc_with_bot_access', api_id, api_hash,system_version="4.16.30-vxCUSTOM")
 
 
 def get_product_from_call(msg):
@@ -23,8 +23,8 @@ def get_percent_from_call(text):
 
 def get_msg_recipient(text):
     if text.find("RTX") != -1:
-        return -settings.RTX_CUSTOMER_ID
-    return settings.CHANNEL_ID
+        return RTX_CUSTOMER_ID
+    return CHANNEL_ID
 
 async def bot_msg_handler(event):
     
@@ -36,12 +36,13 @@ async def bot_msg_handler(event):
     await client.send_message(get_msg_recipient(event.message.message),event.message)
     if cur_percent > MIN_ORDER_PERCENT:
         product_id = get_product_from_call(event.message)
-        if add_to_cart_handler(product_id):
-            await order_handler()     
+        for acc_id in range(len(ACCOUNTS)-1,-1,-1):
+            if add_to_cart_handler(acc_id,product_id):
+                await order_handler(acc_id)     
 
 if __name__ == "__main__":
     client.start()
-    client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[settings.BOT_ID]))
+    client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[BOT_ID]))
     print("Client started!")
     client.run_until_disconnected()
     print("Client disconnected, closing")

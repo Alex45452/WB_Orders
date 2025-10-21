@@ -1,6 +1,6 @@
 from playwright.async_api import async_playwright
 from requests_handlers import add_to_cart_handler
-from settings import cookies, wbx_token, cur_address
+from settings import ACCOUNTS, cur_address
 import json
 import time
 import asyncio
@@ -8,6 +8,24 @@ import asyncio
 MAIN_PAGE_URL = "https://wildberries.ru"
 BASKET_URL = "https://wildberries.ru/lk/basket"
 
+async def get_acc_cookies(acc_id):
+    cookies = [
+        {
+        "name": "wbx-validation-key",
+        "value": ACCOUNTS[acc_id]["WBX_VALIDATION_KEY"],
+        "domain": ".wildberries.ru",
+        "path": "/",
+        "httponly": True,
+        "secure": True,
+        "sameSite": "Lax",
+        # "expires": datetime.datetime.fromisoformat(TIME).timestamp()
+        }
+    ]
+    return cookies
+
+async def get_acc_wbx_token(acc_id):
+    wbx_token = {"token":ACCOUNTS[acc_id]["TOKEN"],"pvKey":None,"slideOff":None}
+    return wbx_token
 
 async def create_order(page):
     await page.goto(BASKET_URL)
@@ -40,18 +58,18 @@ async def browser_close(context,browser):
     await context.close()
     await browser.close()
 
-async def order_handler():
+async def order_handler(acc_id):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context()
 
-        await context.add_cookies(cookies)
+        await context.add_cookies(await get_acc_cookies(acc_id))
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
 
         await page.evaluate(f"""
-                localStorage.setItem('wbx__tokenData', '{json.dumps(wbx_token)}');
+                localStorage.setItem('wbx__tokenData', '{json.dumps(await get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
         print(page)

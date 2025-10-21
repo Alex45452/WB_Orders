@@ -1,26 +1,26 @@
 import httpx
 import time
-from settings import TOKEN, DEVICE_ID
+from settings import ACCOUNTS
 
 DETAIL_URL = "https://card.wb.ru/cards/v4/detail"
 ADD_URL = "https://cart-storage-api.wildberries.ru/api/basket/sync"
 
-
-headers = {
-    "accept": "*/*",
-    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
-    "authorization": f"Bearer {TOKEN}",
-    "content-type": "application/json",
-    "priority": "u=1, i",
-    "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Windows\"",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-site",
-    "wb-apptype": "site"
-}
-
+def get_acc_headers(acc_id):
+    headers = {
+        "accept": "*/*",
+        "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+        "authorization": f"Bearer {ACCOUNTS[acc_id]['TOKEN']}",
+        "content-type": "application/json",
+        "priority": "u=1, i",
+        "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Windows\"",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-site",
+        "wb-apptype": "site"
+    }
+    return headers
 
 def get_product_details_params(product_id):
     params = {
@@ -39,10 +39,10 @@ def get_product_details_params(product_id):
 def check_response_details(response):
     return response.status_code == 200 and len(response.json()) > 0
 
-def get_main_params():
+def get_main_params(acc_id):
     params = {
         "ts":int(time.time()),
-        "device_id":DEVICE_ID
+        "device_id":ACCOUNTS[acc_id]["DEVICE_ID"]
         }
     return params
 
@@ -63,10 +63,11 @@ def check_response_main(response):
     return response.status_code == 200
 # Придумать проверку на успешный запрос, потому что исходя из тестов код ответа 200 не гарантирует добавление  
 
-def add_to_cart_handler(product_id):
+def add_to_cart_handler(acc_id,product_id):
+    headers = get_acc_headers(acc_id)
     response_details = httpx.get(url=DETAIL_URL,params=get_product_details_params(product_id),headers=headers)
     if check_response_details(response_details):
-        main_response = httpx.post(url=ADD_URL,params=get_main_params(),headers=headers,json=get_main_data(response_details))
+        main_response = httpx.post(url=ADD_URL,params=get_main_params(acc_id),headers=headers,json=get_main_data(response_details))
         return check_response_main(main_response)
     return False
 
