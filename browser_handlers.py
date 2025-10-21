@@ -8,7 +8,7 @@ import asyncio
 MAIN_PAGE_URL = "https://wildberries.ru"
 BASKET_URL = "https://wildberries.ru/lk/basket"
 
-async def get_acc_cookies(acc_id):
+def get_acc_cookies(acc_id):
     cookies = [
         {
         "name": "wbx-validation-key",
@@ -23,7 +23,7 @@ async def get_acc_cookies(acc_id):
     ]
     return cookies
 
-async def get_acc_wbx_token(acc_id):
+def get_acc_wbx_token(acc_id):
     wbx_token = {"token":ACCOUNTS[acc_id]["TOKEN"],"pvKey":None,"slideOff":None}
     return wbx_token
 
@@ -63,13 +63,13 @@ async def order_handler(acc_id):
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context()
 
-        await context.add_cookies(await get_acc_cookies(acc_id))
+        await context.add_cookies(get_acc_cookies(acc_id))
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
 
         await page.evaluate(f"""
-                localStorage.setItem('wbx__tokenData', '{json.dumps(await get_acc_wbx_token(acc_id))}');
+                localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
         print(page)
