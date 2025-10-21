@@ -7,7 +7,7 @@ import asyncio
 
 MAIN_PAGE_URL = "https://wildberries.ru"
 BASKET_URL = "https://wildberries.ru/lk/basket"
-TESTING_STATE = False
+NOT_TESTING = True
 
 def get_acc_cookies(acc_id):
     cookies = [
@@ -64,9 +64,11 @@ async def browser_close(context,browser):
     await context.close()
     await browser.close()
 
-async def order_handler(acc_id):
+async def order_handler(acc_id,product_id):
+    if not add_to_cart_handler(acc_id,product_id):
+        return False
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=TESTING_STATE)
+        browser = await p.chromium.launch(headless=NOT_TESTING)
         context = await browser.new_context()
 
         await context.add_cookies(get_acc_cookies(acc_id))
@@ -86,9 +88,8 @@ async def order_handler(acc_id):
 
 if __name__ == "__main__":
     print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
-    TESTING_STATE = True
+    NOT_TESTING = False
     acc_id = 1
     start = time.time()
-    if add_to_cart_handler(acc_id,308868474):
-        asyncio.run(order_handler(acc_id))
+    asyncio.run(order_handler(acc_id,367514477))
     print(time.time()-start)
