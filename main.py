@@ -37,7 +37,7 @@ async def bot_msg_handler(event):
     if cur_percent > MIN_ORDER_PERCENT:
         product_id = get_product_from_call(event.message)
         for acc_id in range(len(ACCOUNTS)-1,-1,-1):
-            await order_handler(acc_id,product_id)     
+            asyncio.create_task(order_handler(acc_id,product_id))     
 
 if __name__ == "__main__":
     client.start()
