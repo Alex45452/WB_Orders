@@ -32,9 +32,9 @@ async def bot_msg_handler(event):
     cur_percent = get_percent_from_call(event.message.message)
     if  cur_percent > MAX_PERCENT :
         return
-
-    await client.send_message(get_msg_recipient(event.message.message),event.message)
-    if cur_percent > MIN_ORDER_PERCENT:
+    cur_recipient = get_msg_recipient(event.message.message)
+    await client.send_message(cur_recipient,event.message)
+    if cur_percent > MIN_ORDER_PERCENT and cur_recipient != RTX_CUSTOMER_ID:
         product_id = get_product_from_call(event.message)
         for acc_id in range(len(ACCOUNTS)-1,-1,-1):
             asyncio.create_task(order_handler(acc_id,product_id))     

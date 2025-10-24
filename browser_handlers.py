@@ -1,4 +1,5 @@
 from playwright.async_api import async_playwright
+from playwright._impl._errors import TimeoutError
 from requests_handlers import add_to_cart_handler
 from settings import ACCOUNTS, cur_address
 import json
@@ -30,7 +31,10 @@ def get_acc_wbx_token(acc_id):
 
 async def create_order(page):
     await page.goto(BASKET_URL)
-    await page.wait_for_selector("div.basket-form__basket-section.basket-section", timeout=20000)
+    try:
+        await page.wait_for_selector("div.basket-form__basket-section.basket-section", timeout=20000)
+    except TimeoutError:
+        print("DIV LOCATOR NOT FOUND")
     await asyncio.sleep(1)
     if await page.locator("label:has-text('Выбрать все')").count() == 1:
         await page.locator("label:has-text('Выбрать все')").click()
