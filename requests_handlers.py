@@ -1,5 +1,6 @@
 import httpx
 import time
+import logging
 from settings import ACCOUNTS
 
 DETAIL_URL = "https://card.wb.ru/cards/v4/detail"
@@ -72,4 +73,4 @@ def add_to_cart_handler(acc_id,product_id):
     return False
 
 if __name__ == "__main__":
-    print("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
+    logging.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
