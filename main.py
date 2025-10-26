@@ -18,7 +18,7 @@ client = TelegramClient('Acc_with_bot_access', api_id, api_hash,system_version="
 
 
 def setup_logger():
-    logging.basicConfig(filename='myapp.log', level=logging.DEBUG)
+    logging.basicConfig(filename='myapp.log', level=logging.INFO)
 
 
 def get_product_from_call(msg):
@@ -51,6 +51,7 @@ async def bot_msg_handler(event):
 if __name__ == "__main__":
     client.start()
     client.add_event_handler(bot_msg_handler, events.NewMessage(incoming=True,from_users=[BOT_ID]))
+    setup_logger()
     logging.info("Client started!")
     client.run_until_disconnected()
     logging.info("Client disconnected, closing")
