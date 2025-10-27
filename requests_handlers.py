@@ -3,6 +3,9 @@ import time
 import logging
 from settings import ACCOUNTS
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='wb.log', level=logging.INFO)
+
 DETAIL_URL = "https://card.wb.ru/cards/v4/detail"
 ADD_URL = "https://cart-storage-api.wildberries.ru/api/basket/sync"
 
@@ -73,4 +76,4 @@ def add_to_cart_handler(acc_id,product_id):
     return False
 
 if __name__ == "__main__":
-    logging.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
+    logger.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")

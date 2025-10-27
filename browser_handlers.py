@@ -11,6 +11,11 @@ MAIN_PAGE_URL = "https://wildberries.ru"
 BASKET_URL = "https://wildberries.ru/lk/basket"
 NOT_TESTING = True
 
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+
 def get_acc_cookies(acc_id):
     cookies = [
         {
@@ -36,43 +41,43 @@ async def create_order(page):
     try:
         await page.wait_for_selector("div.basket-form__basket-section.basket-section", timeout=20000)
     except TimeoutError:
-        logging.info("DIV LOCATOR NOT FOUND")
+        logger.info("DIV LOCATOR NOT FOUND")
     
     await asyncio.sleep(1)
     
     if await page.locator("label:has-text('Выбрать все')").count() == 1:
-        logging.info("Выбрать всё is found")
+        logger.info("Выбрать всё is found")
         await page.locator("label:has-text('Выбрать все')").click()
         await page.locator("label.list-item__checkbox").first.click()
     else:
-        logging.info("Выбрать всё is NOT found")
+        logger.info("Выбрать всё is NOT found")
     
     if await page.locator("span.basket-order__link").count() == 1:
-        logging.info("span.basket is found")
+        logger.info("span.basket is found")
         await page.locator("span.basket-order__link").click()
         await page.locator(f"span.address-item__name-text:has-text('{cur_address}')").click()
         await page.get_by_role("button", name="Заберу отсюда").click()
     else:
-        logging.info("span.basket is found")
+        logger.info("span.basket is found")
     if await page.get_by_role("button", name="Заказать").count() > 0:
-        logging.info("Заказать is found")
+        logger.info("Заказать is found")
     else:
-        logging.info("Заказать is NOT found")
+        logger.info("Заказать is NOT found")
     res = await page.get_by_role("button", name="Заказать").click()
     await asyncio.sleep(0.5)
     bank = page.locator("li.popup__banks-item:has-text('ПСБ')")
     if await bank.count() == 1:
-        logging.info("bank is found")
+        logger.info("bank is found")
         await bank.click()
     await asyncio.sleep(0.5)
     if await page.locator("button.btn-main", has_text="Да, заказать").count() == 1:
-        logging.info("Да, заказать is found")
+        logger.info("Да, заказать is found")
         await page.click("button.btn-main")
     if await page.locator("button.btn-main", has_text="Пополнить и заказать").count() == 1:
-        logging.info("Пополнить и заказать is found")
+        logger.info("Пополнить и заказать is found")
         await page.click("button.btn-main")
     if await page.locator("button.popup__btn-main", has_text="Да, заказать").count() == 1:
-        logging.info("Да, заказать is found")
+        logger.info("Да, заказать is found")
         await page.click("button.popup__btn-main")
 
 
@@ -103,16 +108,18 @@ async def order_handler(acc_id,product_id):
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
-        logging.info(page)
+        logger.info(page)
         await create_order(page)
         await check_order(page) # todo
         await browser_close(context,browser)
 
 
 if __name__ == "__main__":
-    logging.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
+    
+    logger.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
     NOT_TESTING = False
     acc_id = 1
     start = time.time()
-    asyncio.run(order_handler(acc_id,367514477))
-    logging.info(time.time()-start)
+    logger.info("task created")
+    asyncio.create_task(order_handler(acc_id,367514477)) 
+    logger.info(f"order was creating for {time.time()-start}")
