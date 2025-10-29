@@ -99,15 +99,36 @@ async def order_handler(acc_id,product_id):
         browser = await p.chromium.launch(headless=NOT_TESTING)
         context = await browser.new_context()
 
-        await context.add_cookies(get_acc_cookies(acc_id))
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
+        try:
+            await page.wait_for_selector("div.support-title", timeout=5000)
+            logger.info("trying to avoid bot check 1")
+        except:
+            logger.info("Bot check wasnt occure 1")
 
+        await context.add_cookies(get_acc_cookies(acc_id))
+        await page.reload()
+        try:
+            await page.wait_for_selector("div.support-title", timeout=5000)
+            logger.info("trying to avoid bot check")
+            await context.clear_cookies()
+            await page.reload()
+        except:
+            logger.info("Bot check wasnt occure")
+            
+        await context.add_cookies(get_acc_cookies(acc_id))
         await page.evaluate(f"""
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
+        try:
+            await page.wait_for_selector("div.support-title", timeout=5000)
+            logger.info("BOTCHECK PASSED")
+        except:
+            logger.error("BOTCHECK CANT BE PASSED CANCALLING")
+            return False
         logger.info(page)
         await create_order(page)
         await check_order(page) # todo
