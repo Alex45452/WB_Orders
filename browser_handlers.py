@@ -63,7 +63,7 @@ async def create_order(page):
         logger.info("Заказать is found")
     else:
         logger.info("Заказать is NOT found")
-    res = await page.get_by_role("button", name="Заказать").click()
+    res = await page.get_by_role("button", name="Заказать").first.click() #todo
     await asyncio.sleep(0.5)
     bank = page.locator("li.popup__banks-item:has-text('ПСБ')")
     if await bank.count() == 1:
