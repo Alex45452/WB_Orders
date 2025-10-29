@@ -102,33 +102,35 @@ async def order_handler(acc_id,product_id):
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
+        
         try:
-            await page.wait_for_selector("div.support-title", timeout=5000)
+            await page.wait_for_selector("div.support-title", timeout=2000)
             logger.info("trying to avoid bot check 1")
         except:
             logger.info("Bot check wasnt occure 1")
 
         await context.add_cookies(get_acc_cookies(acc_id))
         await page.reload()
+
         try:
-            await page.wait_for_selector("div.support-title", timeout=5000)
+            await page.wait_for_selector("div.support-title", timeout=1000)
             logger.info("trying to avoid bot check")
             await context.clear_cookies()
             await page.reload()
+            await context.add_cookies(get_acc_cookies(acc_id))
         except:
-            logger.info("Bot check wasnt occure")
-            
-        await context.add_cookies(get_acc_cookies(acc_id))
+            logger.info("Bot check wasnt occure 2")
+
         await page.evaluate(f"""
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
         try:
-            await page.wait_for_selector("div.support-title", timeout=5000)
-            logger.info("BOTCHECK PASSED")
-        except:
-            logger.error("BOTCHECK CANT BE PASSED CANCALLING")
+            await page.wait_for_selector("div.support-title", timeout=1000)
+            logger.error("BOTCHECK CANT BE PASSED CANCELLING")
             return False
+        except:
+            logger.info("BOTCHECK PASSED")
         logger.info(page)
         await create_order(page)
         await check_order(page) # todo
