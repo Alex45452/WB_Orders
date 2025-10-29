@@ -102,7 +102,7 @@ async def order_handler(acc_id,product_id):
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
-        
+
         try:
             await page.wait_for_selector("div.support-title", timeout=2000)
             logger.info("trying to avoid bot check 1")
@@ -138,7 +138,11 @@ async def order_handler(acc_id,product_id):
 
 
 if __name__ == "__main__":
-    
+    try:
+        asyncio.get_event_loop()
+    except:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
     logger.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
     NOT_TESTING = False
     acc_id = 1

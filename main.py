@@ -11,9 +11,11 @@ MIN_ORDER_PERCENT = 10
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='wb.log', level=logging.INFO)
 
-
-# loop = asyncio.new_event_loop()
-# asyncio.set_event_loop(loop)
+try:
+    asyncio.get_event_loop()
+except:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
 client = TelegramClient('Acc_with_bot_access', api_id, api_hash,system_version="4.16.30-vxCUSTOM")
 
