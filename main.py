@@ -1,12 +1,13 @@
 from telethon import TelegramClient, events, sync
-from settings import api_id, api_hash, RTX_CUSTOMER_ID, CHANNEL_ID, BOT_ID, ACCOUNTS
+from settings import api_id, api_hash, RTX_CUSTOMER_ID, CHANNEL_ID, BOT_ID, ACCOUNTS, created_orders
 from browser_handlers import order_handler
 from requests_handlers import add_to_cart_handler
 import asyncio
 import logging
 
-MAX_PERCENT = 20
-MIN_ORDER_PERCENT = 10
+MAX_PERCENT = 25
+MIN_ORDER_PERCENT = 13
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='wb.log', level=logging.INFO)
@@ -33,9 +34,7 @@ def get_msg_recipient(text):
         return RTX_CUSTOMER_ID
     return CHANNEL_ID
 
-async def bot_msg_handler(event):
-    
-    logger.info("Got new message from bot")
+async def msg_processing(event):
     cur_percent = get_percent_from_call(event.message.message)
     if  cur_percent > MAX_PERCENT :
         return
@@ -43,11 +42,23 @@ async def bot_msg_handler(event):
     await client.send_message(cur_recipient,event.message)
     if cur_percent > MIN_ORDER_PERCENT and cur_recipient != RTX_CUSTOMER_ID:
         product_id = get_product_from_call(event.message)
-        # for acc_id in range(len(ACCOUNTS)-1,-1,-1):
-        #     asyncio.create_task(order_handler(acc_id,product_id))     
-        #     logger.info(f"task created for acc_id: {acc_id} for porduct_id: {product_id}")
-        asyncio.create_task(order_handler(0,product_id))     
-        logger.info(f"task created for acc_id: {0} for porduct_id: {product_id}")    
+        for acc_id in range(len(ACCOUNTS)-1,-1,-1):
+            asyncio.create_task(order_handle_w_check(acc_id,product_id))     
+            logger.info(f"task created for acc_id: {acc_id} for porduct_id: {product_id}")
+
+async def order_handle_w_check(acc_id,product_id):         
+    order_id = await order_handler(acc_id,product_id)
+    if order_id:
+        logger.info(f"order was created for acc_id: {0} order_id: {order_id}")
+        created_orders[acc_id].append(order_id)
+    else:
+        logger.info(f"order was NOT created for acc_id: {0} order_id: {order_id}")
+
+
+async def bot_msg_handler(event):
+    logger.info("Got new message from bot")
+    asyncio.create_task(msg_processing(event))
+    
 
 if __name__ == "__main__":
     client.start()

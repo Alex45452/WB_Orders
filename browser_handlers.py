@@ -31,11 +31,15 @@ def get_acc_cookies(acc_id):
     ]
     return cookies
 
+def get_full_cookies_for_httpx(context):
+    return context.cookies(urls=MAIN_PAGE_URL)
+
 def get_acc_wbx_token(acc_id):
     wbx_token = {"token":ACCOUNTS[acc_id]["TOKEN"],"pvKey":None,"slideOff":None}
     return wbx_token
 
 async def create_order(page):
+    
     await page.goto(BASKET_URL)
     
     try:
@@ -63,27 +67,36 @@ async def create_order(page):
         logger.info("Заказать is found")
     else:
         logger.info("Заказать is NOT found")
-    res = await page.get_by_role("button", name="Заказать").first.click() #todo
+    try:
+        await page.get_by_role("button", name="Заказать").first.click() 
+    except:
+        logger.info("Main order button is not found, order wasn't complete")
+        return False
     await asyncio.sleep(0.5)
     bank = page.locator("li.popup__banks-item:has-text('ПСБ')")
     if await bank.count() == 1:
         logger.info("bank is found")
         await bank.click()
     await asyncio.sleep(0.5)
-    if await page.locator("button.btn-main", has_text="Да, заказать").count() == 1:
-        logger.info("Да, заказать is found")
-        await page.click("button.btn-main")
-    if await page.locator("button.btn-main", has_text="Пополнить и заказать").count() == 1:
-        logger.info("Пополнить и заказать is found")
-        await page.click("button.btn-main")
-    if await page.locator("button.popup__btn-main", has_text="Да, заказать").count() == 1:
-        logger.info("Да, заказать is found")
-        await page.click("button.popup__btn-main")
-
+    async with page.expect_request("**/submitorder**") as req_info:
+        if await page.locator("button.btn-main", has_text="Да, заказать").count() == 1:
+            logger.info("Да, заказать is found")
+            await page.click("button.btn-main")
+        if await page.locator("button.btn-main", has_text="Пополнить и заказать").count() == 1:
+            logger.info("Пополнить и заказать is found")
+            await page.click("button.btn-main")
+        if await page.locator("button.popup__btn-main", has_text="Да, заказать").count() == 1:
+            logger.info("Да, заказать is found")
+            await page.click("button.popup__btn-main")
+        if req_info.is_done():
+            req_text = (req_info._future._result.post_data)
+            order_rid = req_text[0][req_text[0].rfind("\r\n\r\n")+8:req_text[0].rfind(".0.0")+4]
+            return order_rid
+    return False
 
 async def check_order(page):
     ...
-    # with page.expect_request("**/data_v2**") as req_info:
+    # with page.expect_request("**/submitorder**") as req_info:
     #     page.locator("button.j-btn-confirm-order").click()
     # request = req_info.value
     # print("Отправлен запрос:", request.url)
@@ -98,7 +111,6 @@ async def order_handler(acc_id,product_id):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=NOT_TESTING)
         context = await browser.new_context()
-
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
@@ -114,10 +126,11 @@ async def order_handler(acc_id,product_id):
 
         try:
             await page.wait_for_selector("div.support-title", timeout=1000)
-            logger.info("trying to avoid bot check")
+            logger.info("trying to avoid bot check 2")
             await context.clear_cookies()
             await page.reload()
             await context.add_cookies(get_acc_cookies(acc_id))
+            await page.reload()
         except:
             logger.info("Bot check wasnt occure 2")
 
@@ -125,17 +138,23 @@ async def order_handler(acc_id,product_id):
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
+
         try:
             await page.wait_for_selector("div.support-title", timeout=1000)
+            await context.clear_cookies()
+            await page.reload()
+            await context.add_cookies(get_acc_cookies(acc_id))
+            await page.reload()
+            await page.wait_for_selector("div.support-title", timeout=2000)
             logger.error("BOTCHECK CANT BE PASSED CANCELLING")
             return False
         except:
             logger.info("BOTCHECK PASSED")
-        logger.info(page)
-        await create_order(page)
-        await check_order(page) # todo
-        await browser_close(context,browser)
 
+        logger.info(page)
+        order_id = await create_order(page)
+        await browser_close(context,browser)
+        return order_id
 
 if __name__ == "__main__":
     try:
@@ -148,5 +167,5 @@ if __name__ == "__main__":
     acc_id = 1
     start = time.time()
     logger.info("task created")
-    asyncio.create_task(order_handler(acc_id,367514477)) 
+    asyncio.run(order_handler(acc_id,367514477)) 
     logger.info(f"order was creating for {time.time()-start}")
