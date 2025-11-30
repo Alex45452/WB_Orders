@@ -5,7 +5,7 @@ from requests_handlers import add_to_cart_handler
 import asyncio
 import logging
 
-MAX_PERCENT = 25
+MAX_PERCENT = 30
 MIN_ORDER_PERCENT = 13
 
 
