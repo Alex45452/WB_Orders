@@ -7,7 +7,7 @@ import logging
 
 MAX_PERCENT = 30
 MIN_ORDER_PERCENT = 13
-
+MIN_RATING = 4.5
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='wb.log', level=logging.INFO)
@@ -21,13 +21,17 @@ except:
 client = TelegramClient('Acc_with_bot_access', api_id, api_hash,system_version="4.16.30-vxCUSTOM")
 
 
-def get_product_from_call(msg):
+def get_product_from_msg(msg):
     url = msg.media.webpage.display_url
     product_id = int(url[url.find("g/")+len("g/"):url.rfind('/')])
     return product_id
 
 def get_percent_from_call(text):
     return float(text[text.rfind('(')+1:text.rfind(')')-1])
+
+def get_rating_from_call(text):
+    st = text.rfind('Рейтинг: ')+len("Рейтинг: ")
+    return float(text[st:st+3])
 
 def get_msg_recipient(text):
     if text.find("RTX") != -1:
@@ -36,12 +40,14 @@ def get_msg_recipient(text):
 
 async def msg_processing(event):
     cur_percent = get_percent_from_call(event.message.message)
-    if  cur_percent > MAX_PERCENT :
+    if cur_percent > MAX_PERCENT :
+        return
+    if get_rating_from_call(event.message.message) < MIN_RATING:
         return
     cur_recipient = get_msg_recipient(event.message.message)
     await client.send_message(cur_recipient,event.message)
     if cur_percent > MIN_ORDER_PERCENT and cur_recipient != RTX_CUSTOMER_ID:
-        product_id = get_product_from_call(event.message)
+        product_id = get_product_from_msg(event.message)
         for acc_id in range(len(ACCOUNTS)-1,-1,-1):
             asyncio.create_task(order_handle_w_check(acc_id,product_id))     
             logger.info(f"task created for acc_id: {acc_id} for porduct_id: {product_id}")
