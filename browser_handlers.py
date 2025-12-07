@@ -143,14 +143,16 @@ async def browser_close(context,browser):
     await browser.close()
 
 async def order_handler(acc_id,product_id):
-    if not add_to_cart_handler(acc_id,product_id):
-        return False
+    # if not add_to_cart_handler(acc_id,product_id):
+    #     return False
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=NOT_TESTING)
-        context = await browser.new_context(java_script_enabled=True)
+        context = await browser.new_context()
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
+
+        await asyncio.sleep(10000)
 
         await page.reload()
         await context.add_cookies(get_acc_cookies(acc_id))
