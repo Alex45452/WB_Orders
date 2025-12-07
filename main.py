@@ -18,7 +18,7 @@ try:
     asyncio.get_event_loop()
 except:
     loop = asyncio.new_event_loop()
-    loop.set_exception_handler(None)
+    loop.set_exception_handler(exc_handler)
     asyncio.set_event_loop(loop)
     
 
