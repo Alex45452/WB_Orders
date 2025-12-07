@@ -38,18 +38,20 @@ def get_acc_wbx_token(acc_id):
     wbx_token = {"token":ACCOUNTS[acc_id]["TOKEN"],"pvKey":None,"slideOff":None}
     return wbx_token
 
-async def chaptcha_handler(page,context):
+async def botcheck_handler(page,context):
     try:
-        await page.wait_for_selector("div.support-title", timeout=4000)
-        logger.info("trying to avoid bot check 1")
+        await page.wait_for_selector("div.support-title", timeout=2000)
+        logger.info("got bot check 1")
     except:
         logger.info("Bot check wasnt occure 1")
+        return True
 
     try:
-        await page.wait_for_selector("div.support", timeout=4000)
-        logger.info("trying to avoid bot check alt 1")
+        await page.wait_for_selector("div.support", timeout=2000)
+        logger.info("Got bot check fatal")
+        return False
     except:
-        logger.info("Bot check wasnt occure alt 1")
+        logger.info("Bot check fatal wasnt occure")
 
 
     try:
@@ -74,6 +76,7 @@ async def chaptcha_handler(page,context):
         return False
     except:
         logger.info("BOTCHECK PASSED")
+    return True
 
 async def create_order(page):
     
@@ -143,18 +146,52 @@ async def browser_close(context,browser):
     await browser.close()
 
 async def order_handler(acc_id,product_id):
-    # if not add_to_cart_handler(acc_id,product_id):
-    #     return False
+    if not add_to_cart_handler(acc_id,product_id):
+        return False
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=NOT_TESTING)
-        context = await browser.new_context()
+        chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe"
+        browser = await p.chromium.launch(
+            headless=NOT_TESTING,
+            executable_path=chrome_path,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--disable-web-security",
+                "--disable-features=IsolateOrigins,site-per-process",
+                "--disable-infobars",
+                "--no-sandbox",
+                "--disable-gpu",
+                "--disable-dev-shm-usage",
+                "--no-first-run",
+                "--disable-extensions",
+                "--disable-default-apps",
+                "--disable-popup-blocking",
+                "--disable-background-networking",
+                "--password-store=basic",
+            ],
+        )
+        context = await browser.new_context(
+            #Chrome User-Agent
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/122.0.6261.111 Safari/537.36"
+            ),
+
+            extra_http_headers={
+                "sec-ch-ua": '"Chromium";v="122", "Google Chrome";v="122", "Not_A Brand";v="99"',
+                "sec-ch-ua-platform": '"Windows"',
+                "sec-ch-ua-platform-version": '"10.0.0"',
+                "sec-ch-ua-arch": '"x86"',
+                "sec-ch-ua-bitness": '"64"',
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-model": '""',
+                "x-client-data": "CPiGywE=",
+            },
+        )
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
 
-        await asyncio.sleep(10000)
-
-        await page.reload()
         await context.add_cookies(get_acc_cookies(acc_id))
         await page.evaluate(f"""
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
