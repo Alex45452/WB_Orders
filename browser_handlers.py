@@ -38,6 +38,43 @@ def get_acc_wbx_token(acc_id):
     wbx_token = {"token":ACCOUNTS[acc_id]["TOKEN"],"pvKey":None,"slideOff":None}
     return wbx_token
 
+async def chaptcha_handler(page,context):
+    try:
+        await page.wait_for_selector("div.support-title", timeout=4000)
+        logger.info("trying to avoid bot check 1")
+    except:
+        logger.info("Bot check wasnt occure 1")
+
+    try:
+        await page.wait_for_selector("div.support", timeout=4000)
+        logger.info("trying to avoid bot check alt 1")
+    except:
+        logger.info("Bot check wasnt occure alt 1")
+
+
+    try:
+        await page.wait_for_selector("div.support-title", timeout=2000)
+        logger.info("trying to avoid bot check 2")
+        await context.clear_cookies()
+        await page.reload()
+        await context.add_cookies(get_acc_cookies(acc_id))
+        await page.reload()
+    except:
+        logger.info("Bot check wasnt occure 2")
+
+
+    try:
+        await page.wait_for_selector("div.support-title", timeout=2000)
+        await context.clear_cookies()
+        await page.reload()
+        await context.add_cookies(get_acc_cookies(acc_id))
+        await page.reload()
+        await page.wait_for_selector("div.support-title", timeout=2000)
+        logger.error("BOTCHECK CANT BE PASSED CANCELLING")
+        return False
+    except:
+        logger.info("BOTCHECK PASSED")
+
 async def create_order(page):
     
     await page.goto(BASKET_URL)
@@ -110,46 +147,19 @@ async def order_handler(acc_id,product_id):
         return False
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=NOT_TESTING)
-        context = await browser.new_context()
+        context = await browser.new_context(java_script_enabled=True)
         
         page = await context.new_page()
         await page.goto(MAIN_PAGE_URL)
 
-        try:
-            await page.wait_for_selector("div.support-title", timeout=2000)
-            logger.info("trying to avoid bot check 1")
-        except:
-            logger.info("Bot check wasnt occure 1")
-
-        await context.add_cookies(get_acc_cookies(acc_id))
         await page.reload()
-
-        try:
-            await page.wait_for_selector("div.support-title", timeout=1000)
-            logger.info("trying to avoid bot check 2")
-            await context.clear_cookies()
-            await page.reload()
-            await context.add_cookies(get_acc_cookies(acc_id))
-            await page.reload()
-        except:
-            logger.info("Bot check wasnt occure 2")
-
+        await context.add_cookies(get_acc_cookies(acc_id))
         await page.evaluate(f"""
                 localStorage.setItem('wbx__tokenData', '{json.dumps(get_acc_wbx_token(acc_id))}');
                 """)
         await page.reload()
 
-        try:
-            await page.wait_for_selector("div.support-title", timeout=1000)
-            await context.clear_cookies()
-            await page.reload()
-            await context.add_cookies(get_acc_cookies(acc_id))
-            await page.reload()
-            await page.wait_for_selector("div.support-title", timeout=2000)
-            logger.error("BOTCHECK CANT BE PASSED CANCELLING")
-            return False
-        except:
-            logger.info("BOTCHECK PASSED")
+        
 
         logger.info(page)
         order_id = await create_order(page)
@@ -164,7 +174,7 @@ if __name__ == "__main__":
         asyncio.set_event_loop(loop)
     logger.info("If you see this, u MUST be in a debug session.\nCheck what file you are running!")
     NOT_TESTING = False
-    acc_id = 1
+    acc_id = 0
     start = time.time()
     logger.info("task created")
     asyncio.run(order_handler(acc_id,367514477)) 
