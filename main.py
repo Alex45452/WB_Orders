@@ -5,7 +5,7 @@ import asyncio
 import logging
 
 MAX_PERCENT = 30
-MIN_ORDER_PERCENT = 13
+MIN_ORDER_PERCENT = 9
 MIN_RATING = 4.5
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def get_rating_from_call(text):
     return float(text[st:st+3])
 
 def get_msg_recipient(text):
-    if text.find("RTX") != -1:
+    if text.find("RTX") != -1 or text.find("intel") != -1 or text.find("ryzen") != -1:
         return RTX_CUSTOMER_ID
     return CHANNEL_ID
 
