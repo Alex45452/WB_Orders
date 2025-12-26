@@ -33,8 +33,12 @@ def get_product_from_msg(msg):
 def get_percent_from_call(text):
     return float(text[text.rfind('(')+1:text.rfind(')')-1])
 
-def get_rating_from_call(text):
+def get_seller_rating_from_call(text):
     st = text.rfind('Рейтинг: ')+len("Рейтинг: ")
+    return float(text[st:st+3])
+
+def get_product_rating_from_call(text):
+    st = text.find('Рейтинг: ')+len("Рейтинг: ")
     return float(text[st:st+3])
 
 def get_msg_recipient(text):
@@ -46,7 +50,7 @@ async def msg_processing(event):
     cur_percent = get_percent_from_call(event.message.message)
     if cur_percent > MAX_PERCENT :
         return
-    if get_rating_from_call(event.message.message) < MIN_RATING:
+    if get_seller_rating_from_call(event.message.message) < MIN_RATING and get_product_rating_from_call(event.message.message) < MIN_RATING:
         return
     cur_recipient = get_msg_recipient(event.message.message)
     await client.send_message(cur_recipient,event.message)
