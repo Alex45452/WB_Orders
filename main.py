@@ -41,24 +41,33 @@ def get_product_rating_from_call(text):
     st = text.find('Рейтинг: ')+len("Рейтинг: ")
     return float(text[st:st+3])
 
+def check_no_customs_from_call(text):
+    return text.find("С пошлиной") == -1
+
+def check_call_conditions(event):
+    cur_percent = get_percent_from_call(event.message.message)
+    cur_seller_rating = get_seller_rating_from_call(event.message.message)
+    cur_product_rating = get_product_rating_from_call(event.message.message)
+    return (cur_percent > MAX_PERCENT or 
+            cur_seller_rating < MIN_RATING or 
+            0 != cur_product_rating < MIN_RATING or 
+            check_no_customs_from_call(event.message.message))
+
 def get_msg_recipient(text):
     if text.find("RTX") != -1 or text.find("intel") != -1 or text.find("ryzen") != -1:
         return RTX_CUSTOMER_ID
     return CHANNEL_ID
 
 async def msg_processing(event):
-    cur_percent = get_percent_from_call(event.message.message)
-    if cur_percent > MAX_PERCENT :
-        return
-    if get_seller_rating_from_call(event.message.message) < MIN_RATING and get_product_rating_from_call(event.message.message) < MIN_RATING:
-        return
+    if check_call_conditions(event):
+        return 
     cur_recipient = get_msg_recipient(event.message.message)
     await client.send_message(cur_recipient,event.message)
-    if cur_percent > MIN_ORDER_PERCENT and cur_recipient != RTX_CUSTOMER_ID:
-        product_id = get_product_from_msg(event.message)
-        for acc_id in range(len(ACCOUNTS)-1,-1,-1):
-            asyncio.create_task(order_handle_w_check(acc_id,product_id))     
-            logger.info(f"task created for acc_id: {acc_id} for porduct_id: {product_id}")
+    # if cur_percent > MIN_ORDER_PERCENT and cur_recipient != RTX_CUSTOMER_ID:
+    #     product_id = get_product_from_msg(event.message)
+    #     for acc_id in range(len(ACCOUNTS)-1,-1,-1):
+    #         asyncio.create_task(order_handle_w_check(acc_id,product_id))     
+    #         logger.info(f"task created for acc_id: {acc_id} for porduct_id: {product_id}")
 
 async def order_handle_w_check(acc_id,product_id):         
     order_id = await order_handler(acc_id,product_id)
