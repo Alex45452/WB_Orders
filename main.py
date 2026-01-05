@@ -31,7 +31,8 @@ def get_product_from_msg(msg):
     return product_id
 
 def get_percent_from_call(text):
-    return float(text[text.rfind('(')+1:text.rfind(')')-1])
+    text = text[text.find("Выгода"):]
+    return float(text[text.find('(')+1:text.find(')')-1])
 
 def get_seller_rating_from_call(text):
     st = text.rfind('Рейтинг: ')+len("Рейтинг: ")
