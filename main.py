@@ -43,7 +43,7 @@ def get_product_rating_from_call(text):
     return float(text[st:st+3])
 
 def check_no_customs_from_call(text):
-    return text.find("С пошлиной") == -1
+    return text.find("ошлин") == -1  # check Пошлина
 
 def check_call_conditions(event):
     cur_percent = get_percent_from_call(event.message.message)
@@ -52,7 +52,7 @@ def check_call_conditions(event):
     return (cur_percent > MAX_PERCENT or 
             cur_seller_rating < MIN_RATING or 
             0 != cur_product_rating < MIN_RATING or 
-            check_no_customs_from_call(event.message.message))
+            not check_no_customs_from_call(event.message.message))
 
 def get_msg_recipient(text):
     if text.find("RTX") != -1 or text.find("intel") != -1 or text.find("ryzen") != -1:
