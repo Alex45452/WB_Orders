@@ -59,8 +59,16 @@ def get_msg_recipient(text):
         return RTX_CUSTOMER_ID
     return CHANNEL_ID
 
+def check_created_order(event):
+    text = event.message.message
+    return text.find("создан") == -1
+
+
 async def msg_processing(event):
-    if check_call_conditions(event):
+    if check_created_order(event):
+        client.send_message(cur_recipient,"Заказ создан в боте, проверьте свой аккаунт")
+        return
+    elif check_call_conditions(event):
         return 
     cur_recipient = get_msg_recipient(event.message.message)
     await client.send_message(cur_recipient,event.message)
