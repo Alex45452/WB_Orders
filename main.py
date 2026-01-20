@@ -61,7 +61,7 @@ def get_msg_recipient(text):
 
 def check_created_order(event):
     text = event.message.message
-    return text.find("создан") == -1
+    return text.find("создан") != -1
 
 
 async def msg_processing(event):
