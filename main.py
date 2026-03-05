@@ -66,7 +66,7 @@ def check_created_order(event):
 
 async def msg_processing(event):
     if check_created_order(event):
-        client.send_message(CHANNEL_ID,"Заказ создан в боте, проверьте свой аккаунт")
+        await client.send_message(CHANNEL_ID,"Заказ создан в боте, проверьте свой аккаунт")
         return
     elif check_call_conditions(event):
         return 
